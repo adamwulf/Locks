@@ -10,7 +10,7 @@ import Foundation
 public class RecursiveMutex: NSLocking {
     private let statusLock = Mutex()
     @ThreadLocal private var _isLocked: Bool = false
-    private(set) var isLocked: Bool {
+    public private(set) var isLocked: Bool {
         get {
             statusLock.lock()
             let ret = _isLocked
