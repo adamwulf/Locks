@@ -39,7 +39,9 @@ public struct ThreadLocal<T> {
 
     @inlinable public var wrappedValue: T {
         get {
-            if Thread.current.threadDictionary.allKeys.contains(where: { ($0 as? String) == key }), let v = Thread.current.threadDictionary[key] as? T { return v }
+            if let v = Thread.current.threadDictionary[key] as? T {
+                return v
+            }
             Thread.current.threadDictionary[key] = initialValue
             return initialValue
         }
