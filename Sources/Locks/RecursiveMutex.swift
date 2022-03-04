@@ -27,8 +27,10 @@ public class RecursiveMutex: NSLocking {
         }
     }
 
-    private var mutex: pthread_mutex_t = {
-        var mutex = pthread_mutex_t()
+    private var mutex: pthread_mutex_t
+
+    public init() {
+        mutex = pthread_mutex_t()
         var attr: pthread_mutexattr_t = pthread_mutexattr_t()
         pthread_mutexattr_init(&attr)
         pthread_mutexattr_settype(&attr, PTHREAD_MUTEX_RECURSIVE)
@@ -46,11 +48,6 @@ public class RecursiveMutex: NSLocking {
         default:
             fatalError("Could not create mutex, unspecified error \(err)")
         }
-        return mutex
-    }()
-
-    public init() {
-        // noop
     }
 
     public var name: String?

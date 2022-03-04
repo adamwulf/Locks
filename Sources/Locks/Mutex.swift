@@ -8,8 +8,10 @@
 import Foundation
 
 public class Mutex: NSLocking {
-    private var mutex: pthread_mutex_t = {
-        var mutex = pthread_mutex_t()
+    private var mutex: pthread_mutex_t
+
+    public init() {
+        mutex = pthread_mutex_t()
         let err = pthread_mutex_init(&mutex, nil)
         switch err {
         case 0: // Success
@@ -23,11 +25,6 @@ public class Mutex: NSLocking {
         default:
             fatalError("Could not create mutex, unspecified error \(err)")
         }
-        return mutex
-    }()
-
-    public init() {
-        // noop
     }
 
     public var name: String?
