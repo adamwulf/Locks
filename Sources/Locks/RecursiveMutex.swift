@@ -9,20 +9,17 @@ import Foundation
 
 public class RecursiveMutex: NSLocking {
     private let statusLock = Mutex()
-    @ThreadLocal private var _isThreadLocked: Bool = false
-
-    /// Returns `true` if this mutex is locked on the current thread. This signifies that
-    /// the thread is within the protected zone.
-    public private(set) var isThreadLocked: Bool {
+    @ThreadLocal private var _isLocked: Bool = false
+    public private(set) var isLocked: Bool {
         get {
             statusLock.lock()
-            let ret = _isThreadLocked
+            let ret = _isLocked
             statusLock.unlock()
             return ret
         }
         set {
             statusLock.lock()
-            _isThreadLocked = newValue
+            _isLocked = newValue
             statusLock.unlock()
         }
     }
@@ -54,7 +51,7 @@ public class RecursiveMutex: NSLocking {
 
     public func `try`() -> Bool {
         if pthread_mutex_trylock(&mutex) == 0 {
-            isThreadLocked = true
+            isLocked = true
             return true
         }
         return false
@@ -64,7 +61,7 @@ public class RecursiveMutex: NSLocking {
         let ret = pthread_mutex_lock(&mutex)
         switch ret {
         case 0:
-            isThreadLocked = true
+            isLocked = true
         case EDEADLK:
             fatalError("Could not lock mutex: a deadlock would have occurred")
         case EINVAL:
@@ -78,7 +75,7 @@ public class RecursiveMutex: NSLocking {
         let ret = pthread_mutex_unlock(&mutex)
         switch ret {
         case 0:
-            isThreadLocked = false
+            isLocked = false
         case EPERM:
             fatalError("Could not unlock mutex: thread does not hold this mutex")
         case EINVAL:
