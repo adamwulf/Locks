@@ -8,21 +8,22 @@
 import Foundation
 
 class ReadWriteLock {
-    private var rwlock: pthread_rwlock_t = {
-        var rwlock = pthread_rwlock_t()
-        pthread_rwlock_init(&rwlock, nil)
-        return rwlock
-    }()
+    private let rwlock: UnsafeMutablePointer<pthread_rwlock_t>
+
+    public init() {
+        rwlock = UnsafeMutablePointer<pthread_rwlock_t>.allocate(capacity: 1)
+        pthread_rwlock_init(rwlock, nil)
+    }
 
     public func writeLock() {
-        pthread_rwlock_wrlock(&rwlock)
+        pthread_rwlock_wrlock(rwlock)
     }
 
     public func readLock() {
-        pthread_rwlock_rdlock(&rwlock)
+        pthread_rwlock_rdlock(rwlock)
     }
 
     public func unlock() {
-        pthread_rwlock_unlock(&rwlock)
+        pthread_rwlock_unlock(rwlock)
     }
 }

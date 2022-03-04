@@ -8,11 +8,11 @@
 import Foundation
 
 public class Mutex: NSLocking {
-    private var mutex: pthread_mutex_t
+    private let mutex: UnsafeMutablePointer<pthread_mutex_t>
 
     public init() {
-        mutex = pthread_mutex_t()
-        let err = pthread_mutex_init(&mutex, nil)
+        mutex = UnsafeMutablePointer<pthread_mutex_t>.allocate(capacity: 1)
+        let err = pthread_mutex_init(mutex, nil)
         switch err {
         case 0: // Success
             break
@@ -30,14 +30,14 @@ public class Mutex: NSLocking {
     public var name: String?
 
     public func `try`() -> Bool {
-        if pthread_mutex_trylock(&mutex) == 0 {
+        if pthread_mutex_trylock(mutex) == 0 {
             return true
         }
         return false
     }
 
     public func lock() {
-        let ret = pthread_mutex_lock(&mutex)
+        let ret = pthread_mutex_lock(mutex)
         switch ret {
         case 0: // Success
             break
@@ -51,7 +51,7 @@ public class Mutex: NSLocking {
     }
 
     public func unlock() {
-        let ret = pthread_mutex_unlock(&mutex)
+        let ret = pthread_mutex_unlock(mutex)
         switch ret {
         case 0: // Success
             break
@@ -65,8 +65,8 @@ public class Mutex: NSLocking {
     }
 
     deinit {
-        assert(pthread_mutex_trylock(&self.mutex) == 0 && pthread_mutex_unlock(&self.mutex) == 0,
+        assert(pthread_mutex_trylock(mutex) == 0 && pthread_mutex_unlock(mutex) == 0,
                "deinitialization of a locked mutex results in undefined behavior!")
-        pthread_mutex_destroy(&self.mutex)
+        pthread_mutex_destroy(mutex)
     }
 }

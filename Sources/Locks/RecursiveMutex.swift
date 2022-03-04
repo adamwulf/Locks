@@ -24,33 +24,35 @@ public class RecursiveMutex: NSLocking {
         }
     }
 
-    private var mutex: pthread_mutex_t
+    private var mutex: UnsafeMutablePointer<pthread_mutex_t>
 
     public init() {
-        mutex = pthread_mutex_t()
+        mutex = UnsafeMutablePointer<pthread_mutex_t>.allocate(capacity: 1)
         var attr: pthread_mutexattr_t = pthread_mutexattr_t()
-        pthread_mutexattr_init(&attr)
-        pthread_mutexattr_settype(&attr, PTHREAD_MUTEX_RECURSIVE)
-        let err = pthread_mutex_init(&mutex, &attr)
-        pthread_mutexattr_destroy(&attr)
-        switch err {
-        case 0: // Success
-            break
-        case EAGAIN:
-            fatalError("Could not create mutex: EAGAIN (The system temporarily lacks the resources to create another mutex.)")
-        case EINVAL:
-            fatalError("Could not create mutex: invalid attributes")
-        case ENOMEM:
-            fatalError("Could not create mutex: no memory")
-        default:
-            fatalError("Could not create mutex, unspecified error \(err)")
+        withUnsafeMutablePointer(to: &attr) { attr in
+            pthread_mutexattr_init(attr)
+            pthread_mutexattr_settype(attr, PTHREAD_MUTEX_RECURSIVE)
+            let err = pthread_mutex_init(mutex, attr)
+            pthread_mutexattr_destroy(attr)
+            switch err {
+            case 0: // Success
+                break
+            case EAGAIN:
+                fatalError("Could not create mutex: EAGAIN (The system temporarily lacks the resources to create another mutex.)")
+            case EINVAL:
+                fatalError("Could not create mutex: invalid attributes")
+            case ENOMEM:
+                fatalError("Could not create mutex: no memory")
+            default:
+                fatalError("Could not create mutex, unspecified error \(err)")
+            }
         }
     }
 
     public var name: String?
 
     public func `try`() -> Bool {
-        if pthread_mutex_trylock(&mutex) == 0 {
+        if pthread_mutex_trylock(mutex) == 0 {
             isLocked = true
             return true
         }
@@ -58,7 +60,7 @@ public class RecursiveMutex: NSLocking {
     }
 
     public func lock() {
-        let ret = pthread_mutex_lock(&mutex)
+        let ret = pthread_mutex_lock(mutex)
         switch ret {
         case 0:
             isLocked = true
@@ -72,7 +74,7 @@ public class RecursiveMutex: NSLocking {
     }
 
     public func unlock() {
-        let ret = pthread_mutex_unlock(&mutex)
+        let ret = pthread_mutex_unlock(mutex)
         switch ret {
         case 0:
             isLocked = false
@@ -86,8 +88,8 @@ public class RecursiveMutex: NSLocking {
     }
 
     deinit {
-        assert(pthread_mutex_trylock(&self.mutex) == 0 && pthread_mutex_unlock(&self.mutex) == 0,
+        assert(pthread_mutex_trylock(mutex) == 0 && pthread_mutex_unlock(mutex) == 0,
                "deinitialization of a locked mutex results in undefined behavior!")
-        pthread_mutex_destroy(&self.mutex)
+        pthread_mutex_destroy(mutex)
     }
 }
