@@ -68,5 +68,6 @@ public class Mutex: NSLocking {
         assert(pthread_mutex_trylock(mutex) == 0 && pthread_mutex_unlock(mutex) == 0,
                "deinitialization of a locked mutex results in undefined behavior!")
         pthread_mutex_destroy(mutex)
+        mutex.deallocate()
     }
 }

@@ -15,6 +15,10 @@ class ReadWriteLock {
         pthread_rwlock_init(rwlock, nil)
     }
 
+    deinit {
+        rwlock.deallocate()
+    }
+
     public func writeLock() {
         pthread_rwlock_wrlock(rwlock)
     }
