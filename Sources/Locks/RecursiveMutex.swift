@@ -8,20 +8,16 @@
 import Foundation
 
 public class RecursiveMutex: NSLocking {
-    private let statusLock = Mutex()
-    @ThreadLocal private var _isLocked: Bool = false
-    public private(set) var isLocked: Bool {
-        get {
-            statusLock.lock()
-            let ret = _isLocked
-            statusLock.unlock()
-            return ret
+    private var lockCount = 0
+
+    // returns true if the lock is locked and held by this thread, false otherwise
+    public var isLocked: Bool {
+        if pthread_mutex_trylock(mutex) == 0 {
+            let locked = lockCount > 0
+            _ = pthread_mutex_unlock(mutex)
+            return locked
         }
-        set {
-            statusLock.lock()
-            _isLocked = newValue
-            statusLock.unlock()
-        }
+        return false
     }
 
     private var mutex: UnsafeMutablePointer<pthread_mutex_t>
@@ -53,7 +49,7 @@ public class RecursiveMutex: NSLocking {
 
     public func `try`() -> Bool {
         if pthread_mutex_trylock(mutex) == 0 {
-            isLocked = true
+            lockCount += 1
             return true
         }
         return false
@@ -63,7 +59,7 @@ public class RecursiveMutex: NSLocking {
         let ret = pthread_mutex_lock(mutex)
         switch ret {
         case 0:
-            isLocked = true
+            lockCount += 1
         case EDEADLK:
             fatalError("Could not lock mutex: a deadlock would have occurred")
         case EINVAL:
@@ -74,10 +70,11 @@ public class RecursiveMutex: NSLocking {
     }
 
     public func unlock() {
+        lockCount -= 1
         let ret = pthread_mutex_unlock(mutex)
         switch ret {
         case 0:
-            isLocked = false
+            break
         case EPERM:
             fatalError("Could not unlock mutex: thread does not hold this mutex")
         case EINVAL:
@@ -88,7 +85,7 @@ public class RecursiveMutex: NSLocking {
     }
 
     deinit {
-        assert(pthread_mutex_trylock(mutex) == 0 && pthread_mutex_unlock(mutex) == 0,
+        assert(pthread_mutex_trylock(mutex) == 0 && pthread_mutex_unlock(mutex) == 0 && lockCount == 0,
                "deinitialization of a locked mutex results in undefined behavior!")
         pthread_mutex_destroy(mutex)
         mutex.deallocate()

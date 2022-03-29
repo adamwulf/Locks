@@ -7,7 +7,7 @@
 
 import Foundation
 
-public class SpinLock: NSLocking {
+public class UnfairLock: NSLocking {
     private let unfairLock: os_unfair_lock_t
     private var locked = false
 
