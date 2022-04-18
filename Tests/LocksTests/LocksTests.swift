@@ -12,6 +12,22 @@ final class LocksTests: XCTestCase {
         XCTAssertTrue(true)
     }
 
+    func testAtomicSet() throws {
+        // This is an example of a functional test case.
+        // Use XCTAssert and related functions to verify your tests produce the correct
+        // results.
+        var set = AtomicSet<Int>()
+
+        XCTAssertEqual(set.count, 0)
+        set.insert(12)
+        XCTAssertEqual(set.count, 1)
+        XCTAssertTrue(set.contains(12))
+        set.insert(12)
+        XCTAssertEqual(set.count, 1)
+        set.remove(12)
+        XCTAssertEqual(set.count, 0)
+    }
+
     func testRecursiveMutex() throws {
         let lock = RecursiveMutex()
         func foo(num: Int) {
