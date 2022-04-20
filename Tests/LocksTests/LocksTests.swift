@@ -28,6 +28,22 @@ final class LocksTests: XCTestCase {
         XCTAssertEqual(set.count, 0)
     }
 
+    func testAtomicDictionary() throws {
+        // This is an example of a functional test case.
+        // Use XCTAssert and related functions to verify your tests produce the correct
+        // results.
+        var dict = AtomicDictionary<String, Int>()
+
+        XCTAssertEqual(dict.count, 0)
+        dict["foo"] = 12
+        XCTAssertEqual(dict.count, 1)
+        XCTAssertEqual(dict["foo"], 12)
+        dict["foo"] = 12
+        XCTAssertEqual(dict.count, 1)
+        dict["foo"] = nil
+        XCTAssertEqual(dict.count, 0)
+    }
+
     func testRecursiveMutex() throws {
         let lock = RecursiveMutex()
         func foo(num: Int) {
