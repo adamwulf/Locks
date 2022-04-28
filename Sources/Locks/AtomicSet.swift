@@ -41,10 +41,14 @@ import Foundation
     }
 
     public func contains(_ member: Element) -> Bool {
+        lock.lock()
+        defer { lock.unlock() }
         return contents.contains(member)
     }
 
     public func contains(where predicate: (Element) throws -> Bool) rethrows -> Bool {
+        lock.lock()
+        defer { lock.unlock() }
         return try contents.contains(where: predicate)
     }
 }
