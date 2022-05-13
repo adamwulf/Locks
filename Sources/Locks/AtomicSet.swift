@@ -28,10 +28,22 @@ import Foundation
         contents.insert(member)
     }
 
+    public mutating func formUnion<S>(_ other: S) where Element == S.Element, S: Sequence {
+        lock.lock()
+        defer { lock.unlock() }
+        contents.formUnion(other)
+    }
+
     public mutating func remove(_ member: Element) {
         lock.lock()
         defer { lock.unlock() }
         contents.remove(member)
+    }
+
+    public mutating func subtract<S>(_ other: S) where Element == S.Element, S: Sequence {
+        lock.lock()
+        defer { lock.unlock() }
+        contents.subtract(other)
     }
 
     public mutating func removeAll() {
