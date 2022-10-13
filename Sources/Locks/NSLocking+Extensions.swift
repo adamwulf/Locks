@@ -11,9 +11,7 @@ public extension NSLocking {
     @discardableResult
     func lockDuring<T>(block : () -> T) -> T {
         self.lock()
-        defer {
-            self.unlock()
-        }
+        defer { self.unlock() }
         return block()
     }
 }

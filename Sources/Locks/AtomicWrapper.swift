@@ -24,18 +24,14 @@ public class Atomic<Value> {
     @discardableResult
     public func atomically<T>(_ mutation: (inout Value) -> T) -> T {
         lock.lock()
-        defer {
-            lock.unlock()
-        }
+        defer { lock.unlock() }
         return mutation(&value)
     }
 
     public var wrappedValue: Value {
         get {
             lock.lock()
-            defer {
-                lock.unlock()
-            }
+            defer { lock.unlock() }
             return value
         }
         set {
