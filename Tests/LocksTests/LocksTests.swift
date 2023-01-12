@@ -2,14 +2,28 @@ import XCTest
 @testable import Locks
 
 final class LocksTests: XCTestCase {
-    func testSpinLock() throws {
+    func testUnfairLock() throws {
         // This is an example of a functional test case.
         // Use XCTAssert and related functions to verify your tests produce the correct
         // results.
         let lock = UnfairLock()
+        XCTAssertFalse(lock.isLocked)
         lock.lock()
+        XCTAssertTrue(lock.isLocked)
         lock.unlock()
-        XCTAssertTrue(true)
+        XCTAssertFalse(lock.isLocked)
+    }
+
+    func testMutexLock() throws {
+        // This is an example of a functional test case.
+        // Use XCTAssert and related functions to verify your tests produce the correct
+        // results.
+        let lock = Mutex()
+        XCTAssertFalse(lock.isLocked)
+        lock.lock()
+        XCTAssertTrue(lock.isLocked)
+        lock.unlock()
+        XCTAssertFalse(lock.isLocked)
     }
 
     func testAtomicSet() throws {

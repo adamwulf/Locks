@@ -10,6 +10,17 @@ import Foundation
 public class Mutex: NSLocking {
     private let mutex: UnsafeMutablePointer<pthread_mutex_t>
 
+    // returns true if the lock is locked, false otherwise
+    public var isLocked: Bool {
+        if pthread_mutex_trylock(mutex) == 0 {
+            _ = pthread_mutex_unlock(mutex)
+            // if we were able to lock with the try(), then it wasn't locked when this method was called
+            return false
+        }
+        // if we can't lock with the try(), then it was already locked
+        return true
+    }
+
     public init() {
         mutex = UnsafeMutablePointer<pthread_mutex_t>.allocate(capacity: 1)
         let err = pthread_mutex_init(mutex, nil)
