@@ -7,10 +7,17 @@
 
 import Foundation
 
+/// RecursiveMutex is a class that implements a recursive mutex lock.
+///
+/// It is a wrapper around the pthread_mutex_t type, and provides a
+/// more Swift-friendly interface.
+///
+/// The lock is recursive, meaning that the same thread can acquire the
+/// lock multiple times without deadlocking.
 public class RecursiveMutex: NSLocking {
     private var lockCount = 0
 
-    // returns true if the lock is locked and held by this thread, false otherwise
+    /// Returns true if the lock is locked and held by this thread, false otherwise
     public var isLocked: Bool {
         if pthread_mutex_trylock(mutex) == 0 {
             let locked = lockCount > 0
@@ -22,6 +29,7 @@ public class RecursiveMutex: NSLocking {
 
     private var mutex: UnsafeMutablePointer<pthread_mutex_t>
 
+    /// Initializes the mutex.
     public init() {
         mutex = UnsafeMutablePointer<pthread_mutex_t>.allocate(capacity: 1)
         var attr: pthread_mutexattr_t = pthread_mutexattr_t()
@@ -45,8 +53,12 @@ public class RecursiveMutex: NSLocking {
         }
     }
 
+    /// The name of the mutex. Setting this property is not threadsafe.
     public var name: String?
 
+    /// Tries to acquire the lock.
+    ///
+    /// Returns true if the lock was acquired, false otherwise.
     public func `try`() -> Bool {
         if pthread_mutex_trylock(mutex) == 0 {
             lockCount += 1
@@ -55,6 +67,9 @@ public class RecursiveMutex: NSLocking {
         return false
     }
 
+    /// Acquires the lock.
+    ///
+    /// If the lock is already held by this thread, the lock count is incremented.
     public func lock() {
         let ret = pthread_mutex_lock(mutex)
         switch ret {
@@ -69,6 +84,9 @@ public class RecursiveMutex: NSLocking {
         }
     }
 
+    /// Releases the lock.
+    ///
+    /// If the lock is held multiple times by this thread, the lock count is decremented.
     public func unlock() {
         lockCount -= 1
         let ret = pthread_mutex_unlock(mutex)
@@ -84,6 +102,9 @@ public class RecursiveMutex: NSLocking {
         }
     }
 
+    /// Deinitializes the mutex.
+    ///
+    /// If the mutex is locked, this will result in undefined behavior.
     deinit {
         assert(pthread_mutex_trylock(mutex) == 0 && pthread_mutex_unlock(mutex) == 0 && lockCount == 0,
                "deinitialization of a locked mutex results in undefined behavior!")

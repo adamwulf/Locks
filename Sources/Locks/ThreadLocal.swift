@@ -34,9 +34,12 @@ import CoreFoundation
 ///
 @propertyWrapper
 public struct ThreadLocal<T> {
+    /// The initial value of the property.
     @usableFromInline let initialValue: T
+    /// A unique key used to store the value in the thread dictionary.
     @usableFromInline let key: String = UUID().uuidString
 
+    /// The wrapped value of the property.
     @inlinable public var wrappedValue: T {
         get {
             if let v = Thread.current.threadDictionary[key] as? T {
@@ -50,6 +53,7 @@ public struct ThreadLocal<T> {
         }
     }
 
+    /// Initializes the property wrapper with the given initial value.
     @inlinable public init(wrappedValue: T) {
         initialValue = wrappedValue
     }

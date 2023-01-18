@@ -7,13 +7,19 @@
 
 import Foundation
 
+/// An extension of the Atomic wrapper for Int values
 public extension Atomic where Value == Int {
+    /// Increments the wrapped value by one
+    /// - Returns: The new value of the wrapper
     func increment() -> Int {
         return atomically { val in
             val += 1
             return val
         }
     }
+
+    /// Decrements the wrapped value by one
+    /// - Returns: The new value of the wrapper
     func decrement() -> Int {
         return atomically { val in
             val -= 1

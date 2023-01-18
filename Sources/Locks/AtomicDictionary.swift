@@ -7,17 +7,21 @@
 
 import Foundation
 
+/// A thread-safe dictionary that can be used to store key-value pairs
 @frozen public struct AtomicDictionary<Key, Value>: ExpressibleByDictionaryLiteral where Key: Hashable {
-
+    /// Initializes the dictionary with the given elements
     public init(dictionaryLiteral elements: (Key, Value)...) {
         for element in elements {
             contents[element.0] = element.1
         }
     }
 
+    /// The internal lock used to ensure thread-safety
     private let lock = Mutex()
+    /// The internal contents of the dictionary
     private var contents: [Key: Value] = [:]
 
+    /// The number of elements in the dictionary
     var count: Int {
         lock.lock()
         defer { lock.unlock() }
@@ -28,6 +32,7 @@ import Foundation
     /// key-value pair.
     public typealias Element = (key: Key, value: Value)
 
+    /// Subscript access to the dictionary
     public subscript(key: Key) -> Value? {
         get {
             lock.lock()
