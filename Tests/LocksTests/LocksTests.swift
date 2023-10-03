@@ -72,4 +72,14 @@ final class LocksTests: XCTestCase {
         foo(num: 10)
         XCTAssertFalse(lock.isLocked)
     }
+
+    func testToggleBoolean() throws {
+        @Atomic var someBool = false
+
+        XCTAssertFalse(someBool)
+        XCTAssertTrue($someBool.toggleToTrueIfFalse())
+        XCTAssertTrue(someBool)
+        XCTAssertFalse($someBool.toggleToTrueIfFalse())
+        XCTAssertTrue(someBool)
+    }
 }

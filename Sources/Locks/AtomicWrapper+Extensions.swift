@@ -27,3 +27,17 @@ public extension Atomic where Value == Int {
         }
     }
 }
+
+public extension Atomic where Value == Bool {
+    /// - returns: `true` if the boolean was `false` and is now toggled to `true`, `false` otherwise
+    func toggleToTrueIfFalse() -> Bool {
+        var didToggle = false
+        self.atomically { val in
+            if !val {
+                val = true
+                didToggle = true
+            }
+        }
+        return didToggle
+    }
+}
